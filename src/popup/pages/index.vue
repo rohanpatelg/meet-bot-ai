@@ -33,7 +33,7 @@ const count = computed(() => store.count)
     </p>
 
     <p>
-      GIT Commit:
+      GIT 
       <a
         :href="gitCommitURL"
         class="text-green-500"
