@@ -11,6 +11,13 @@ let chat = ref<Chat[]>([]);
 let intervalId: number | null = null;
 const chatContainer = ref<HTMLElement | null>(null);
 const chatListContainer = ref<HTMLElement | null>(null);
+const isVisible = ref(true)
+
+function handleKeyPress(event: KeyboardEvent) {
+  if (event.shiftKey && event.key === 'Q') {
+    isVisible.value = !isVisible.value
+  }
+}
 // Function to check if the current page is Google Meet
 function isGoogleMeet() {
     console.log("true")
@@ -181,21 +188,23 @@ onMounted(() => {
   if (isGoogleMeet()) {
     intervalId = window.setInterval(runInterval, 500);
   }
+  window.addEventListener('keydown', handleKeyPress)
 });
 
 onUnmounted(() => {
   if (intervalId !== null) {
     clearInterval(intervalId);
   }
+  window.removeEventListener('keydown', handleKeyPress)
 });
 </script>
 
 <template>
-    <div v-if="!isOpen" ref="assistantButton" class="assistant-button" @click="isOpen = true">
+    <div  v-show="isVisible"  v-if="!isOpen" ref="assistantButton" class="assistant-button" @click="isOpen = true">
         Assistant
     </div>
     <Teleport to="body">
-        <div v-if="isOpen" class="openPanel" ref="chatbox">
+        <div  v-show="isVisible"  v-if="isOpen" class="openPanel" ref="chatbox">
             <div class="panel-header">
                 <h2>Chat Assistant</h2>
                 <div @click="isOpen = false" class="close-button-container">
@@ -208,9 +217,9 @@ onUnmounted(() => {
             <div ref="chatContainer" class="chat-container">
                 
                 <div ref="chatListContainer" class="chat-list-container">
-                    <p style="margin-top: -10px;">
-                    <strong>Note:</strong>
-                    <i>Please turn on captions to use this feature</i>
+                    <p style="margin-top: -30px; margin-bottom: 10px;">
+                    <strong><i style="color: red;">Note:</i></strong>
+                    <i style="color: green; margin-left: 4px;">Please turn on captions to use this feature</i>
                 </p>
                     <ul class="chat-list">
                         <li v-for="message in chat" :key="message.ticId" class="chat-message">
