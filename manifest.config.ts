@@ -32,6 +32,7 @@ export default {
       js: ['src/content-script/index.ts'],
       matches: ['*://*/*'],
       run_at: 'document_end',
+      
     },
   ],
   // Full options page
@@ -48,10 +49,7 @@ export default {
       matches: ['*://*/*'],
       resources: ['src/content-script/index.ts'],
     },
-    {
-      matches: ['*://*/*'],
-      resources: ['src/content-script/iframe/index.html'],
-    },
+  
   ],
   icons: {
     16: 'src/assets/logo.png',
