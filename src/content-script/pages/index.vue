@@ -18,6 +18,22 @@ function handleKeyPress(event: KeyboardEvent) {
     isVisible.value = !isVisible.value
   }
 }
+const screenshotUrl = ref('')
+
+function takeScreenshot() {
+    console.log("takeScreenshot")
+  chrome.runtime.sendMessage({action: "takeScreenshot"}, (response) => {
+    if (response.error) {
+      console.error("Error taking screenshot:", response.error);
+    } else if (response && response.screenshotUrl) {
+      screenshotUrl.value = response.screenshotUrl;
+      console.log(screenshotUrl.value, "screenshotUrl")
+      // You can now use this URL to display the screenshot or send it to your backend
+    } else {
+      console.error("Unexpected response:", response);
+    }
+  });
+}
 // Function to check if the current page is Google Meet
 function isGoogleMeet() {
     console.log("true")
@@ -206,8 +222,8 @@ onUnmounted(() => {
     <Teleport to="body">
         <div  v-show="isVisible"  v-if="isOpen" class="openPanel" ref="chatbox">
             <div class="panel-header">
-                <h2>Chat Assistant</h2>
-                <div @click="isOpen = false" class="close-button-container">
+                <h2>Interview Assistant</h2>
+                <div @click="isOpen = false" class="chat-close">
                     <button class="close-button">
                     &times;
                 </button>
@@ -216,7 +232,7 @@ onUnmounted(() => {
             </div>
             <div ref="chatContainer" class="chat-container">
                 
-                <div ref="chatListContainer" class="chat-list-container">
+                <div ref="chatListContainer" :class="screenshotUrl ? 'chat-list-container' : 'chat-list-container-without-screenshot'">
                     <p style="margin-top: -30px; margin-bottom: 10px;">
                     <strong><i style="color: red;">Note:</i></strong>
                     <i style="color: green; margin-left: 4px;">Please turn on captions to use this feature</i>
@@ -228,9 +244,19 @@ onUnmounted(() => {
                         </li>
                     </ul>
                 </div>
+                <div v-if="screenshotUrl" class="screenshot-container">
+                    <img :src="screenshotUrl" alt="Screenshot" style="width: 100%; height: 100%;" />
+                    <div class="close-button-container" v-if="screenshotUrl" @click="screenshotUrl = ''">
+                        &times;
+                    </div>
+                </div>
                 <div class="button-container">
-                <button @click="sendMessage" class="send-button">Send</button>
-                <button @click="resetChat" class="reset-button">Reset</button>
+                    
+                <button @click="takeScreenshot" style="font-size: 10px;color:black;border: 1px solid black;border-radius: 99999px;padding: 8px;background-color: white;">Take Screenshot</button>
+                <div class="button-container-2">
+                    <button @click="sendMessage" class="send-button">Send</button>
+                    <button @click="resetChat" class="reset-button">Reset</button>
+                </div>
             </div>
             </div>
             
@@ -261,7 +287,7 @@ onUnmounted(() => {
 .openPanel {
     position: fixed;
     bottom: 0px;
-    right: 20px;
+    right: 10px;
     width: 400px;
     height: 99%;
     background-color: #f0f0f0;
@@ -310,7 +336,17 @@ onUnmounted(() => {
 
 .chat-list-container{
     padding-top: 25px;
-    height: 95%;
+    display: flex;
+    flex-grow: 1;
+    height: calc(100% - 160px);
+    scroll-behavior: smooth;
+    overflow-y: auto;
+}
+.chat-list-container-without-screenshot{
+    padding-top: 25px;
+    display: flex;
+    flex-grow: 1;
+    height: 90%;
     scroll-behavior: smooth;
     overflow-y: auto;
 }
@@ -343,6 +379,15 @@ onUnmounted(() => {
     border-top: 1px solid #ddd;
     background-color: #f0f0f0;
     justify-content: space-between;
+    align-items: center;
+    height: 60px;
+
+}
+
+.button-container-2{
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .send-button, .reset-button {
@@ -360,6 +405,36 @@ onUnmounted(() => {
 .reset-button {
     background-color: #f44336;
     color: white;
+}
+.screenshot-container{
+    display: flex;
+    align-items: center;
+    height: 100px;
+    width: 100%;
+    position: relative;
+}
+.close-button-container{
+    position: absolute;
+    top: -10px;
+    right: 0px;
+    color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(241, 15, 49);
+    border-radius: 100%;
+    width: 24px;
+    height: 24px;
+}
+.chat-close{
+
+    cursor: pointer;
+    height: 20px;
+    width: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
 }
 </style>
 
